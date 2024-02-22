@@ -1,12 +1,3 @@
-// This example uses an ESP32 Development Board
-// to connect to shiftr.io.
-//
-// You can check on your device after a successful
-// connection here: https://www.shiftr.io/try.
-//
-// by Joël Gähwiler
-// https://github.com/256dpi/arduino-mqtt
-
 #include <WiFiClientSecure.h>
 #include <MQTT.h>
 
@@ -15,8 +6,8 @@ const char pass[] = "";
 const char* mqtt_server = "";
 const char *subscribeTopic = "";
 const char *publicTopic = "";
-const char* username = "master:mqttuser"; // Service User Realm:Serviceuser
-const char* mqttpass = ""; // Service User Secret
+const char* username = "master:mqttuser"; 
+const char* mqttpass = ""; 
 const char* clientID = "client123";
 
 WiFiClientSecure net;
@@ -30,44 +21,26 @@ void connect() {
     Serial.print(".");
     delay(1000);
   }
-
   Serial.print("\nconnecting...");
-  // do not verify tls certificate
-  // check the following example for methods to verify the server:
-  // https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFiClientSecure/examples/WiFiClientSecure/WiFiClientSecure.ino
   net.setInsecure();
   while (!client.connect(clientID, username, mqttpass)) {
     Serial.print(".");
     delay(1000);
   }
-
   Serial.println("\nconnected!");
-
   client.subscribe(subscribeTopic);
-  // client.unsubscribe("/hello");
 }
 
 void messageReceived(String &topic, String &payload) {
   Serial.println("incoming: " + topic + " - " + payload);
-
-  // Note: Do not use the client in the callback to publish, subscribe or
-  // unsubscribe as it may cause deadlocks when other things arrive while
-  // sending and receiving acknowledgments. Instead, change a global variable,
-  // or push to a queue and handle it in the loop after calling `client.loop()`.
 }
 
 void setup() {
   Serial.begin(115200);
   WiFi.begin(ssid, pass);
-
-  // Note: Local domain names (e.g. "Computer.local" on OSX) are not supported
-  // by Arduino. You need to set the IP address directly.
-  //
-  // MQTT brokers usually use port 8883 for secure connections.
   client.begin(mqtt_server, 8883, net);
   client.onMessage(messageReceived);
   pinMode(25, INPUT);
-
   connect();
 }
 
@@ -78,13 +51,11 @@ void loop() {
   if (!client.connected()) {
     connect();
   }
-
-  // publish a message roughly every second.
   if (millis() - lastMillis > 1000) {
     lastMillis = millis();
-  int value = digitalRead(25);
-  String valueStr = String(value);
-  Serial.print("Value : "); Serial.println(value);
+    int value = digitalRead(25);
+    String valueStr = String(value);
+    Serial.print("Value : "); Serial.println(value);
     client.publish(publicTopic, valueStr.c_str());
   }
 }
